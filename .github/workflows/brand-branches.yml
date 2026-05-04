@@ -1,0 +1,50 @@
+name: Brand 12 Fleet Branches
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - copilot/setup-secure-handshake
+
+permissions:
+  contents: write
+
+jobs:
+  brand:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure git
+        run: |
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions"
+
+      - name: Brand the 12 branches
+        run: |
+          branches=("alpha" "beta" "gamma" "delta" "epsilon" "zeta" "eta" "theta" "iota" "kappa" "lambda" "omega")
+
+          for i in "${!branches[@]}"; do
+            branch="${branches[$i]}"
+            node_id=$((i + 1))
+
+            # Create or reset branch from current HEAD
+            git checkout -B "$branch"
+
+            # Write unique identity file
+            echo "{ \"node_id\": $node_id, \"branch_name\": \"$branch\", \"status\": \"active\" }" > config.json
+
+            git add config.json
+            git commit -m "Branding Node: $branch"
+            git push origin "$branch"
+
+            echo "✅ Branded and pushed branch: $branch (node $node_id)"
+          done
+
+          # End on omega
+          git checkout omega
+          echo "🏁 All 12 nodes branded. Active on: omega"
